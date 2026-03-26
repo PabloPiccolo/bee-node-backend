@@ -19,7 +19,7 @@ const db = mysql.createConnection({
 // 📡 endpoint
 
 app.get('/dane', (req, res) => {
-  const sql = 'SELECT temperatura, TIME(data) AS godzina FROM pomiary ORDER BY data DESC LIMIT 50';
+const sql = 'SELECT temperatura, TIME(data_pomiaru) AS godzina FROM pomiary ORDER BY data_pomiaru DESC LIMIT 50';
   db.query(sql, (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(results);
