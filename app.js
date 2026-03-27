@@ -6,9 +6,10 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 // 🔌 DB
-const db = mysql.createConnection({
+const db = mysql.createPool({
     host:process.env.DATABASE_HOST,
     user: process.env.DATABASE_USER,
     password:process.env.DATABASE_PASSWORD,
@@ -18,23 +19,25 @@ const db = mysql.createConnection({
 
 // 📡 endpoint
 
-app.get('/dane', (req, res) => {
-const sql = 'SELECT temperatura, TIME(data_pomiaru) AS godzina FROM pomiary ORDER BY data_pomiaru DESC LIMIT 50';
-  db.query(sql, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
+app.get('/dane', async (req, res) => {
+    try{
+const [results] = await db.query( 'SELECT temperatura, TIME(data_pomiaru) AS godzina FROM pomiary ORDER BY data_pomiaru DESC');
+ res.json(results);}
+    catch(err){
+        res.status(500).json({ error: err.message });
+
+  }
 });
 
-app.get('/dodaj', (req, res) => {
-  const temp = req.query.temp;
-
-  const sql = 'INSERT INTO pomiary (temperatura) VALUES (?)';
-
-  db.query(sql, [temp], (err) => {
-    if (err) return res.status(500).json(err);
-    res.json({ status: 'OK' });
-  });
+app.post('/dodaj', async(req, res) => {
+  const temp = parseFloat(req.body.temp);
+    if(isNaN(temp))
+        return res.status(400).json({error: "Nieprawidlowa temperatura"}); 
+    try{
+        await db.query('INSERT INTO pomiary (temperatura) VALUES (?)',[temp]);
+        res.json({status: "OK"});}
+    catch(err){res.ststus(500).json({error: err.message}); 
+              }
 });
 
 // 🚀 start
