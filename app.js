@@ -21,7 +21,7 @@ const db = mysql.createPool({
 
 app.get('/dane', async (req, res) => {
     try{
-const [results] = await db.query( 'SELECT temperatura,DATE_FORMAT(data_pomiaru,'%Y-%m-%d') AS data, TIME(data_pomiaru) AS godzina FROM pomiary ORDER BY data_pomiaru DESC');
+const [results] = await db.query( 'SELECT temperatura, DATE_FORMAT(data_pomiaru,'%Y-%m-%d') AS data, TIME(data_pomiaru) AS godzina FROM pomiary ORDER BY data_pomiaru DESC');
  res.json(results);}
     catch(err){
         res.status(500).json({ error: err.message });
@@ -36,7 +36,7 @@ app.post('/dodaj', async(req, res) => {
     try{
         await db.query('INSERT INTO pomiary (temperatura) VALUES (?)',[temp]);
         res.json({status: "OK"});}
-    catch(err){res.ststus(500).json({error: err.message}); 
+    catch(err){res.status(500).json({error: err.message}); 
               }
 });
 
